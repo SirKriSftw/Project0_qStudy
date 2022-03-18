@@ -1,0 +1,1 @@
+server=DESKTOP-TDTK0RJ\KRISSQL;Initial Catalog=qStudyDB;Persist Security Info=True;User ID=sa;Password=rev511
