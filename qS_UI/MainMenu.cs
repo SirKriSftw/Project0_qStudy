@@ -149,7 +149,7 @@ namespace qS_UI
                         choiceRepo.AddChoices(qID, currQuestion.choices);
                     break;
                     case "2":
-                        currQuestion.createQuestion(testID);
+                        currQuestion = currQuestion.createQuestion(testID);
                         questionRepo.AddQuestion(currQuestion);
                     break;
                     default:
