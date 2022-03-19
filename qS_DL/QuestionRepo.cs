@@ -13,7 +13,36 @@ namespace qS_DL
         {
             _connectionString = connectionString;
         }
-
+        
+        public int AddQuestion(Question question)
+        {
+            using(SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string query = "INSERT INTO Questions VALUES (@testID, @typeID, @question, @answer)";
+                using(SqlCommand cmd = new SqlCommand(query,conn))
+                {
+                    cmd.Parameters.AddWithValue("testID",question.testID);
+                    cmd.Parameters.AddWithValue("typeID",question.typeID);
+                    cmd.Parameters.AddWithValue("question",question.question);
+                    cmd.Parameters.AddWithValue("answer",question.answer);
+                    cmd.ExecuteNonQuery();
+                }
+                query = "SELECT Max(questionID) FROM Questions";
+                using(SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    using(SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if(reader.HasRows)
+                        {
+                            reader.Read();
+                            return reader.GetInt32(0);
+                        }
+                    }
+                }
+                }
+            return 0;
+        }
         //public Question getQuestion(int question)
     }
 }

@@ -9,12 +9,40 @@ namespace qS_DL
 {
     public class TestRepo
     {
-        private string _connectionString;
+        private string _connectionString;        
         public TestRepo(string connectionString)
         {
             _connectionString = connectionString;
         }
 
+        public List<Test> getUsersTest(int user)
+        {
+            List<Test> usersTests = new List<Test>();
+            using(SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string query = "SELECT * FROM Tests WHERE userID = @userID";
+                using(SqlCommand cmd = new SqlCommand(query,conn))
+                {
+                    cmd.Parameters.AddWithValue("@userID", user);
+                    using(SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if(reader.HasRows)
+                        {
+                            while(reader.Read())
+                            {
+                                int testID = reader.GetInt32(0);
+                                string testName = reader.GetString(2);  
+
+                                Test readTest = new Test(testID, testName);
+                                usersTests.Add(readTest);
+                            }
+                        }
+                    }
+                }
+            }
+            return usersTests;
+        }
         public List<Question> getTestQuestions(int test)
         {
             List<Question> testQuestions = new List<Question>();
@@ -49,7 +77,8 @@ namespace qS_DL
                             DataTable Choices = dataSet.Tables["Choices"];
                             foreach(DataRow choiceRow in Choices.Rows)
                             {
-                                currQuestion.choices.Add((string)choiceRow["choice"]);
+                                Choice newChoice = new Choice(questionID, char.Parse((string)choiceRow["choiceLetter"]), (string)choiceRow["choice"]);
+                                currQuestion.choices.Add(newChoice);
                             }
                             dataSet = new DataSet();                           
                         }
@@ -58,7 +87,33 @@ namespace qS_DL
             }
             return testQuestions;    
         }
-    
+        public int saveTest( int userID, string testName)
+        {
+            using(SqlConnection conn = new SqlConnection(_connectionString))  
+            {
+                conn.Open();
+                string query = "INSERT INTO Tests VALUES (@userID, @testName)";
+                using(SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@userID", userID);
+                    cmd.Parameters.AddWithValue("@testName", testName);
+                    cmd.ExecuteNonQuery();
+                }
+                query = "SELECT Max(testID) FROM Tests";
+                using(SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    using(SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if(reader.HasRows)
+                        {
+                            reader.Read();
+                            return reader.GetInt32(0);
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
         // public List<Test> getAllTests(int user)
     }
 }

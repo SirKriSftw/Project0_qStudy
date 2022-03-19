@@ -7,8 +7,6 @@ namespace qS_UI
         static void Main(string[] args)
         {
             MainMenu menu = new MainMenu();
-            menu.displayTest(1);
-            menu.displayTest(2);
         }
     }
 }

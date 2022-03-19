@@ -30,6 +30,6 @@ SELECT * FROM Questions
 CREATE TABLE Choices(
 	questionID int FOREIGN KEY REFERENCES Questions(questionID) on DELETE cascade,
 	choiceLetter varchar(10) NOT NULL,
-	choices varchar(100) NOT NULL
+	choice varchar(100) NOT NULL
 )
 SELECT * FROM Choices
