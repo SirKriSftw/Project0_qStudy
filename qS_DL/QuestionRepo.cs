@@ -22,10 +22,10 @@ namespace qS_DL
                 string query = "INSERT INTO Questions VALUES (@testID, @typeID, @question, @answer)";
                 using(SqlCommand cmd = new SqlCommand(query,conn))
                 {
-                    cmd.Parameters.AddWithValue("testID",question.testID);
-                    cmd.Parameters.AddWithValue("typeID",question.typeID);
-                    cmd.Parameters.AddWithValue("question",question.question);
-                    cmd.Parameters.AddWithValue("answer",question.answer);
+                    cmd.Parameters.AddWithValue("@testID",question.testID);
+                    cmd.Parameters.AddWithValue("@typeID",question.typeID);
+                    cmd.Parameters.AddWithValue("@question",question.question);
+                    cmd.Parameters.AddWithValue("@answer",question.answer);
                     cmd.ExecuteNonQuery();
                 }
                 query = "SELECT Max(questionID) FROM Questions";

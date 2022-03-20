@@ -10,6 +10,8 @@ namespace qS_UI
     {
         int currUserID { get; set; } = 1;
         string connectionString { get; set; } = File.ReadAllText("./connectionString.txt");
+        int loadedTestID { get; set; }
+        string loadedTestName { get; set; }
         List<Question> loadedTest = new List<Question>();
 
         public MainMenu()
@@ -33,16 +35,16 @@ namespace qS_UI
             {
                 System.Console.WriteLine("1. Load a test");
                 System.Console.WriteLine("2. Create a test");
-                System.Console.WriteLine("3. Edit a test");
-                System.Console.WriteLine("4. Delete a test");
                 if(testLoaded)
                 {
-                System.Console.WriteLine("5. Take currently loaded test");
+                System.Console.WriteLine("3. Edit loaded test");
+                System.Console.WriteLine("4. Delete loaded test");
+                System.Console.WriteLine("5. Take loaded test");
                 System.Console.WriteLine("6. Exit");
                 }
                 else
                 {
-                    System.Console.WriteLine("5. Exit");
+                    System.Console.WriteLine("3. Exit");
                 }
                     
                 string choice = Console.ReadLine();
@@ -61,31 +63,30 @@ namespace qS_UI
                         makeTest();
                     break;
                     case "3":
-                        //print all tests from logged user
-                        //take input for which test to edit
-                        //edit test
-                    break;
-                    case "4":
-                        //print all tests from logged user
-                        //take input for which test to delete
-                        //delete test
-                    break; 
-                    case "5":
                         if(testLoaded)
                         {
-                            displayTest(loadedTest);
-                            //take loaded test
+                            //edit test
                         }
                         else
                         {
                             isStudying = false;
-                        }
+                        }                        
+                    break;
+                    case "4":
+                        if (deleteTest(1))
+                        {
+                            testLoaded = false;
+                        }                        
+                    break; 
+                    case "5":
+                        displayTest(loadedTest);
+                        //take loaded test
+
                     break;
                     default:
                         isStudying = false;
                     break;
                 }
-
             }
         }
 
@@ -182,9 +183,23 @@ namespace qS_UI
         {           
             TestRepo testRepo = new TestRepo(connectionString);
             List<Question> test = testRepo.getTestQuestions(testID);
+            loadedTestID = testID;
             return test;
         }
         //public void editTest()
-        //public void deleteTest()
+        public bool deleteTest(int userID)
+        {
+            TestRepo testRepo = new TestRepo(connectionString);
+            System.Console.WriteLine("Are you sure you want to delete?");
+            string userChoice = Console.ReadLine();
+            userChoice = userChoice.ToUpper();
+            if(userChoice.Equals("Y") || userChoice.Equals("YES"))
+            {
+                testRepo.deleteTest(userID, loadedTestID);
+                return true;
+            }
+            return false;
+            
+        }   
     }
 }

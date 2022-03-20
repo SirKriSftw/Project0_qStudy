@@ -114,6 +114,20 @@ namespace qS_DL
             }
             return 0;
         }
-        // public List<Test> getAllTests(int user)
+        public bool deleteTest(int user, int test)
+        {
+            using(SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string query = "DELETE FROM Tests WHERE userID = @userID AND testID = @testID";
+                using(SqlCommand cmd = new SqlCommand(query,conn))
+                {
+                    cmd.Parameters.AddWithValue("@userID",user);
+                    cmd.Parameters.AddWithValue("@testID",test);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            return false;
+        }
     }
 }
