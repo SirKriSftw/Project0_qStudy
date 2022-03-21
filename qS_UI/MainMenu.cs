@@ -230,7 +230,7 @@ namespace qS_UI
                         case "2":
                             System.Console.WriteLine("What would you like to edit the answer to?");
                             string changeATo = Console.ReadLine();
-                            //questionRepo.EditAnswer(questionID, changeATo);
+                            questionRepo.EditAnswer(questionID, changeATo);
                         break;
                         case "3":
                             if(test[questionIndex].typeID == 1)
@@ -239,7 +239,7 @@ namespace qS_UI
                             string choiceLetter = Console.ReadLine();
                             System.Console.WriteLine("What would you like to edit the " + choiceLetter + " choice to?");
                             string changeCTo = Console.ReadLine();
-                            //choiceRepo.EditChoice(questionID, choiceLetter, changeCTo);
+                            choiceRepo.EditChoice(questionID, choiceLetter, changeCTo);
                             }
                             else
                             {
