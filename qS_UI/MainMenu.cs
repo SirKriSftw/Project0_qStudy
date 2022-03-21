@@ -51,9 +51,6 @@ namespace qS_UI
                 switch(choice)
                 {
                     case "1":
-                        //print all tests from logged in user
-                        //take input for which test to load
-                        //load test
                         viewTests(1);
                         int testID = Convert.ToInt32(Console.ReadLine());
                         loadedTest = loadTest(testID);
@@ -65,7 +62,7 @@ namespace qS_UI
                     case "3":
                         if(testLoaded)
                         {
-                            //edit test
+                            editTest(loadedTest);
                         }
                         else
                         {
@@ -186,7 +183,76 @@ namespace qS_UI
             loadedTestID = testID;
             return test;
         }
-        //public void editTest()
+        public void editTest(List<Question> test)
+        {
+            QuestionRepo questionRepo = new QuestionRepo(connectionString);
+            ChoiceRepo choiceRepo = new ChoiceRepo(connectionString);
+            bool isEditing = true;
+            while(isEditing)
+            {
+                displayTest(test);
+                System.Console.WriteLine("Which question would you like to edit?");
+                string input = Console.ReadLine();
+                int questionID = -1;
+                if(string.IsNullOrEmpty(input))
+                {
+                    isEditing = false;
+                }
+                else
+                {
+                    questionID = Convert.ToInt32(input);
+                    int questionIndex = 0;
+                    while(test[questionIndex].questionID != questionID && questionIndex < test.Count)
+                    {
+                        questionIndex++;
+                    }
+                    System.Console.WriteLine("What would you like to edit?");
+                    System.Console.WriteLine("  1. The question");
+                    System.Console.WriteLine("  2. The answer");
+                    if(test[questionIndex].typeID == 1)
+                    {
+                        System.Console.WriteLine("  3. The choices");
+                        System.Console.WriteLine("  4. Exit");
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("  3. Exit"); 
+                    }                   
+                    string toEdit = Console.ReadLine();
+                    switch(toEdit)
+                    {
+                        case "1":
+                            System.Console.WriteLine("What would you like to edit the quesiton to?");
+                            string changeQTo = Console.ReadLine();
+                            questionRepo.EditQuestion(questionID, changeQTo);
+                            test[questionIndex].question = changeQTo;
+                        break;
+                        case "2":
+                            System.Console.WriteLine("What would you like to edit the answer to?");
+                            string changeATo = Console.ReadLine();
+                            //questionRepo.EditAnswer(questionID, changeATo);
+                        break;
+                        case "3":
+                            if(test[questionIndex].typeID == 1)
+                            {
+                            System.Console.WriteLine("What choice would you like to edit?");
+                            string choiceLetter = Console.ReadLine();
+                            System.Console.WriteLine("What would you like to edit the " + choiceLetter + " choice to?");
+                            string changeCTo = Console.ReadLine();
+                            //choiceRepo.EditChoice(questionID, choiceLetter, changeCTo);
+                            }
+                            else
+                            {
+                                isEditing = false;
+                            }
+                        break;
+                        default:
+                            isEditing = false;
+                        break;
+                    }
+                }
+            }
+        }
         public bool deleteTest(int userID)
         {
             TestRepo testRepo = new TestRepo(connectionString);

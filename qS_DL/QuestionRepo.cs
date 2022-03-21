@@ -43,6 +43,36 @@ namespace qS_DL
                 }
             return 0;
         }
-        //public Question getQuestion(int question)
+        public void EditQuestion(int questionID, string changeTo)
+        {
+            using(SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string query = "UPDATE Questions SET question = @changeTo WHERE questionID = @questionID";
+                using(SqlCommand cmd = new SqlCommand(query,conn))
+                {
+                    cmd.Parameters.AddWithValue("@changeTo", changeTo);
+                    cmd.Parameters.AddWithValue("@questionID", questionID);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void EditAnswer(int questionID, string changeTo)
+        {
+            using(SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string query = "UPDATE Questions SET answer = @changeTo WHERE questionID = @questionID";
+                using(SqlCommand cmd = new SqlCommand(query,conn))
+                {
+                    cmd.Parameters.AddWithValue("@changeTo", changeTo);
+                    cmd.Parameters.AddWithValue("@questionID", questionID);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
     }
 }
