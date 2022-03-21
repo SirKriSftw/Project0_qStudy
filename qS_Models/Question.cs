@@ -38,7 +38,6 @@ namespace qS_Models
         }
         public void displayQuestion()
         {
-            System.Console.WriteLine();
             System.Console.WriteLine(question);
             if(typeID == 1)
             {

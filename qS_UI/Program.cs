@@ -6,6 +6,7 @@ namespace qS_UI
     {
         static void Main(string[] args)
         {
+            // The main menu intferace, used to get user input            
             MainMenu menu = new MainMenu();
         }
     }

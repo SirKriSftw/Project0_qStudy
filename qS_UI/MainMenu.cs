@@ -8,19 +8,29 @@ namespace qS_UI
 {
     class MainMenu
     {
-        int currUserID { get; set; } = -1;
+        // Keeps track of the current user's ID
+        int currUserID { get; set; } = -1; // Defaulted as -1 as to say "Not logged in"
+        // Used to connect to DB
         string connectionString { get; set; } = File.ReadAllText("./connectionString.txt");
+        // Keeps track of the currently loaded test's ID
         int loadedTestID { get; set; }
-        string loadedTestName { get; set; }
+        // The currently loaded test's question (used so you dont have to query the DB everytime)
         List<Question> loadedTest = new List<Question>();
 
         public MainMenu()
         {
+            // Start up the menu
             start();
         }
 
+        /*
+            The method that is fired as soon as a Main Menu object is instantiated.
+            It will prompt user to login and terminate the program if the user fails to.
+            If login successful, proceed to logged in menu.
+        */
         public void start()
         {
+            // Ask user for login info
             System.Console.WriteLine("Login Required");
             System.Console.WriteLine("Please enter your username");
             string user = Console.ReadLine();
@@ -28,24 +38,45 @@ namespace qS_UI
             string pass = Console.ReadLine();
             currUserID = login(user, pass);
 
+            // If login successful
             if(currUserID !=-1)
             {
+                // Give logged in menu (where you can loaded and manipulate tests)
                 loggedInMenu();
             }
             else
             {
+                // Login unsuccessful, terminate program
                 System.Console.WriteLine("Login failed. Bye bye");
             }
             
         }
 
+        /*
+            The method is fired after a sucessful login.
+            At first there are 3 options:
+                Load a test
+                Create a test
+                Exit
+            After loaded a test there is 6 options:
+                Load a test
+                Create a test
+                Edit loaded test
+                Delete loaded test
+                Take loaded test
+                Exit
+            Upon exiting the program terminates
+        */
         public void loggedInMenu()
         {
-            System.Console.WriteLine("--------------Welcome to qStudy!--------------");
+            // Used to keep program looping
             bool isStudying = true;
+            // Used to know if to display 3 or 6 options (if test is loaded or not)
             bool testLoaded = false;
+            // The core loop of the program, used to determine what the user wishes to do
             while(isStudying)
             {
+                Console.Clear();
                 System.Console.WriteLine("1. Load a test");
                 System.Console.WriteLine("2. Create a test");
                 if(testLoaded)
@@ -64,16 +95,22 @@ namespace qS_UI
                 switch(choice)
                 {
                     case "1":
-                        int testID = viewTests(currUserID);                        
+                        // First print out all user's test then ask which test to take
+                        int testID = viewTests(currUserID);
+                        // If an invalid testID is chosen, return -1 and break
+                        if(testID == -1) break; 
+                        // If a valid testID is chosen, load it                       
                         loadedTest = loadTest(testID);
                         testLoaded = true;
                     break;
                     case "2":
+                        // Call method to create a new test
                         makeTest();
                     break;
                     case "3":
                         if(testLoaded)
                         {
+                            // Call method to edit loaded test
                             editTest(loadedTest);
                         }
                         else
@@ -82,27 +119,39 @@ namespace qS_UI
                         }                        
                     break;
                     case "4":
+                        // Delete loaded test if user confirms it
                         if (deleteTest(currUserID))
-                        {
+                        {   
+                            // Test no longer loaded since it is deleted
                             testLoaded = false;
                         }                        
                     break; 
                     case "5":
+                        // Take loaded test and return % result
                         takeTest(loadedTest);
+                        // User hits enter to proceed and see menu
+                        Console.ReadLine();
                     break;
                     default:
+                        // Any other case, exit loop and terminate
                         isStudying = false;
                     break;
                 }
             }
         }
 
+        /*
+            A method used to log the user in given a username and password.
+            Uses the UserRepo object to verify the user exists and that it is their password
+            Returns -1 if login fails
+        */
         public int login(string username, string password)
         {
             UserRepo userRepo = new UserRepo(connectionString);
             return userRepo.login(username, password);
         }
         #region Displaying test
+        // Displays test's question given a testID (Not currently used)
         public void displayTest(int testID)
         {
             TestRepo testRepo = new TestRepo(connectionString);
@@ -115,36 +164,68 @@ namespace qS_UI
                 questionNo++;
             }
         }
+        /* 
+            Displays test's questions given a list of questions (Used so we have to query the DB less often)
+            Return list of all question IDs (used so when displaying to user the questions are in sequential order and not random IDs like '1 5 7 9 12')
+        */
         public List<int> displayTest(List<Question> test)
         {
             int questionNo = 1;
+            // Use list to keep track of all the question IDs
             List<int> questionIDs = new List<int>();
             foreach(Question currQuestion in test)
             {
                 System.Console.Write(questionNo + ". ");
                 currQuestion.displayQuestion();
                 questionNo++;
+                // Adds current question's ID to the list
                 questionIDs.Add(currQuestion.questionID);
             }
             return questionIDs;
         }
         #endregion
         #region Load Test
+        /*
+            Displays all user's tests
+            Returns the test ID of test selected
+            If invalid test chosen, return -1
+        */
         public int viewTests(int userID)
         {
+            // TestRepo used to communicate with DB
             TestRepo testRepo = new TestRepo(connectionString);
+            // List of all user's tests
             List<Test> tests = testRepo.getUsersTest(userID);
+            // Keeps track of all the testIDs (used so when displaying to user the tests are in sequential order and not random IDs like '1 5 7 9 12')
             List<int> testIDs = new List<int>();
             int testNo = 1;
+            // Print test numbers and names
             foreach(Test test in tests)
             {
                 testIDs.Add(test.testID);
                 System.Console.WriteLine(testNo + ". " + test.name);
             }
-            int index = Convert.ToInt32(Console.ReadLine());
-            return testIDs[index - 1];
+            // Make sure input is not empty
+            string input = Console.ReadLine();
+            if(!string.IsNullOrEmpty(input))
+            {
+                int index = Convert.ToInt32(input);
+                // Make sure input was a given option
+                if(index <= testIDs.Count)
+                {
+                    // Return select testID
+                    return testIDs[index - 1];
+                }
+                else return -1;
+            }
+            else return -1;
+            
         }
 
+        /*
+            Method used to load a test given its test ID
+            Returns the list of questions for the given test
+        */
         public List<Question> loadTest(int testID)
         {           
             TestRepo testRepo = new TestRepo(connectionString);
@@ -154,16 +235,20 @@ namespace qS_UI
         }
         #endregion
         #region Create Test
+        /*
+            Method used to create a new test
+        */
         public void makeTest()
         {
             System.Console.WriteLine("Enter test's name");
             string name = Console.ReadLine();
             TestRepo testRepo = new TestRepo(connectionString);
+            // Save the test to the DB and make questions for test
             int testID = testRepo.saveTest(currUserID, name);
-            makeQuestion(testID);
+            makeQuestions(testID);
             
         }
-        private void makeQuestion(int testID)
+        private void makeQuestions(int testID)
         {
             QuestionRepo questionRepo = new QuestionRepo(connectionString);
             ChoiceRepo choiceRepo = new ChoiceRepo(connectionString);
