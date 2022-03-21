@@ -8,7 +8,7 @@ namespace qS_UI
 {
     class MainMenu
     {
-        int currUserID { get; set; } = 1;
+        int currUserID { get; set; } = -1;
         string connectionString { get; set; } = File.ReadAllText("./connectionString.txt");
         int loadedTestID { get; set; }
         string loadedTestName { get; set; }
@@ -21,13 +21,26 @@ namespace qS_UI
 
         public void start()
         {
-            // System.Console.WriteLine("Login Required");
-            // System.Console.WriteLine("Please enter your username");
-            // string user = Console.ReadLine();
-            // System.Console.WriteLine("Please enter your password");
-            // string pass = Console.ReadLine();
+            System.Console.WriteLine("Login Required");
+            System.Console.WriteLine("Please enter your username");
+            string user = Console.ReadLine();
+            System.Console.WriteLine("Please enter your password");
+            string pass = Console.ReadLine();
+            currUserID = login(user, pass);
 
+            if(currUserID !=-1)
+            {
+                loggedInMenu();
+            }
+            else
+            {
+                System.Console.WriteLine("Login failed. Bye bye");
+            }
+            
+        }
 
+        public void loggedInMenu()
+        {
             System.Console.WriteLine("--------------Welcome to qStudy!--------------");
             bool isStudying = true;
             bool testLoaded = false;
@@ -51,8 +64,7 @@ namespace qS_UI
                 switch(choice)
                 {
                     case "1":
-                        viewTests(1);
-                        int testID = Convert.ToInt32(Console.ReadLine());
+                        int testID = viewTests(currUserID);                        
                         loadedTest = loadTest(testID);
                         testLoaded = true;
                     break;
@@ -70,7 +82,7 @@ namespace qS_UI
                         }                        
                     break;
                     case "4":
-                        if (deleteTest(1))
+                        if (deleteTest(currUserID))
                         {
                             testLoaded = false;
                         }                        
@@ -85,8 +97,11 @@ namespace qS_UI
             }
         }
 
-        //public bool login(string username, string password)
-        //public void logout()
+        public int login(string username, string password)
+        {
+            UserRepo userRepo = new UserRepo(connectionString);
+            return userRepo.login(username, password);
+        }
         #region Displaying test
         public void displayTest(int testID)
         {
@@ -100,26 +115,34 @@ namespace qS_UI
                 questionNo++;
             }
         }
-        public void displayTest(List<Question> test)
+        public List<int> displayTest(List<Question> test)
         {
             int questionNo = 1;
+            List<int> questionIDs = new List<int>();
             foreach(Question currQuestion in test)
             {
                 System.Console.Write(questionNo + ". ");
                 currQuestion.displayQuestion();
                 questionNo++;
+                questionIDs.Add(currQuestion.questionID);
             }
+            return questionIDs;
         }
         #endregion
         #region Load Test
-        public void viewTests(int userID)
+        public int viewTests(int userID)
         {
             TestRepo testRepo = new TestRepo(connectionString);
             List<Test> tests = testRepo.getUsersTest(userID);
+            List<int> testIDs = new List<int>();
+            int testNo = 1;
             foreach(Test test in tests)
             {
-                test.displayTestName();
+                testIDs.Add(test.testID);
+                System.Console.WriteLine(testNo + ". " + test.name);
             }
+            int index = Convert.ToInt32(Console.ReadLine());
+            return testIDs[index - 1];
         }
 
         public List<Question> loadTest(int testID)
@@ -184,10 +207,11 @@ namespace qS_UI
         {
             QuestionRepo questionRepo = new QuestionRepo(connectionString);
             ChoiceRepo choiceRepo = new ChoiceRepo(connectionString);
+            List<int> questionIDs;
             bool isEditing = true;
             while(isEditing)
             {
-                displayTest(test);
+                questionIDs = displayTest(test);
                 System.Console.WriteLine("Which question would you like to edit?");
                 string input = Console.ReadLine();
                 int questionID = -1;
@@ -197,7 +221,8 @@ namespace qS_UI
                 }
                 else
                 {
-                    questionID = Convert.ToInt32(input);
+                    int questionIDIndex = Convert.ToInt32(input);
+                    questionID = questionIDs[questionIDIndex-1];
                     int questionIndex = 0;
                     while(test[questionIndex].questionID != questionID && questionIndex < test.Count)
                     {
@@ -228,6 +253,7 @@ namespace qS_UI
                             System.Console.WriteLine("What would you like to edit the answer to?");
                             string changeATo = Console.ReadLine();
                             questionRepo.EditAnswer(questionID, changeATo);
+                            test[questionIndex].answer = changeATo;
                         break;
                         case "3":
                             if(test[questionIndex].typeID == 1)
@@ -237,6 +263,13 @@ namespace qS_UI
                             System.Console.WriteLine("What would you like to edit the " + choiceLetter + " choice to?");
                             string changeCTo = Console.ReadLine();
                             choiceRepo.EditChoice(questionID, choiceLetter, changeCTo);
+                                foreach(Choice choice in test[questionIndex].choices)
+                                {
+                                    if(choice.choiceLetter.ToString() == choiceLetter)
+                                    {
+                                        choice.choice = changeCTo;
+                                    }
+                                }
                             }
                             else
                             {

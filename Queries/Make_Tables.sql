@@ -1,6 +1,6 @@
 CREATE TABLE Users(
 	userID int PRIMARY KEY Identity,
-	username varchar(50),
+	username varchar(50) UNIQUE,
 	password varchar(50)
 )
 SELECT * FROM Users
