@@ -352,12 +352,12 @@ namespace qS_UI
                     if(test[questionIndex].typeID == 1)
                     {
                         System.Console.WriteLine("  3. The choices");
-                        System.Console.WriteLine("  4. Delete Question");
+                        System.Console.WriteLine("  4. Delete question");
                         System.Console.WriteLine("  5. Exit");
                     }
                     else
                     {
-                        System.Console.WriteLine("  3. Delete Question");
+                        System.Console.WriteLine("  3. Delete question");
                         System.Console.WriteLine("  4. Exit"); 
                     }                   
                     string toEdit = Console.ReadLine();
