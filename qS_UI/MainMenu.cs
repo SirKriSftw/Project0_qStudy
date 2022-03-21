@@ -245,17 +245,25 @@ namespace qS_UI
             TestRepo testRepo = new TestRepo(connectionString);
             // Save the test to the DB and make questions for test
             int testID = testRepo.saveTest(currUserID, name);
+            // Make questions for newly created test, passing testID
             makeQuestions(testID);
             
         }
+        /*
+            Make questions for a given testID
+        */
         private void makeQuestions(int testID)
         {
             QuestionRepo questionRepo = new QuestionRepo(connectionString);
+            // Choice repo needed in case of multiple choice questions
             ChoiceRepo choiceRepo = new ChoiceRepo(connectionString);
+            // Used to know when to stop adding questions
             bool isAddingQuestions = true;
+            // Question object that is eventually saved to DB
             Question currQuestion = new Question();
             while(isAddingQuestions)
             {
+                // First get type of question
                 System.Console.WriteLine("Select type of question");
                 System.Console.WriteLine("1. Multiple Choice");
                 System.Console.WriteLine("2. Free Response");
@@ -263,20 +271,29 @@ namespace qS_UI
                 string type = Console.ReadLine();
                 switch(type)
                 {
+                    // IF question is Multiple choice
                     case "1":
+                        // Create multiple choice question
                         currQuestion = currQuestion.createMCQuestion(testID);
+                        // Save to repo and get questionID
                         int qID = questionRepo.AddQuestion(currQuestion);
+                        // Add choices to given questionID
                         choiceRepo.AddChoices(qID, currQuestion.choices);
                     break;
+                    // IF question is Free Response 
                     case "2":
+                        // Create question
                         currQuestion = currQuestion.createQuestion(testID);
+                        // Save question to DB
                         questionRepo.AddQuestion(currQuestion);
                     break;
                     default:
+                        // If input it blank, done adding questions
                         if(string.IsNullOrEmpty(type))
                         {
                             isAddingQuestions = false;
                         }
+                        // Else, invalid input was recieved (like "3" or "apple")
                         else
                         {
                             System.Console.WriteLine("Invalid option");
@@ -288,31 +305,41 @@ namespace qS_UI
         }
         #endregion
         
+        /*
+            A method to edit a test using its list of questions, just to query the DB less
+        */
         public void editTest(List<Question> test)
         {
             QuestionRepo questionRepo = new QuestionRepo(connectionString);
             ChoiceRepo choiceRepo = new ChoiceRepo(connectionString);
+            // Used so when displaying to user the questions are in sequential order and not random IDs like '1 5 7 9 12'
             List<int> questionIDs;
             bool isEditing = true;
             while(isEditing)
             {
+                // First find which question to edit and get list of question IDs
                 questionIDs = displayTest(test);
                 System.Console.WriteLine("Which question would you like to edit?");
                 string input = Console.ReadLine();
                 int questionID = -1;
+                // IF input is empty, done editing
                 if(string.IsNullOrEmpty(input))
                 {
                     isEditing = false;
                 }
+                // ELSE edit question
                 else
                 {
                     int questionIDIndex = Convert.ToInt32(input);
+                    // Get the inputted question's real questionID
                     questionID = questionIDs[questionIDIndex-1];
                     int questionIndex = 0;
+                    // Find the question with the inputted questionID
                     while(test[questionIndex].questionID != questionID && questionIndex < test.Count)
                     {
                         questionIndex++;
                     }
+                    // Then ask what part of the question needs to be edited (question, answer, -in the case of MC questions- choices)
                     System.Console.WriteLine("What would you like to edit?");
                     System.Console.WriteLine("  1. The question");
                     System.Console.WriteLine("  2. The answer");
@@ -331,23 +358,30 @@ namespace qS_UI
                         case "1":
                             System.Console.WriteLine("What would you like to edit the quesiton to?");
                             string changeQTo = Console.ReadLine();
+                            // Edit the question and save change to DB
                             questionRepo.EditQuestion(questionID, changeQTo);
+                            // Edit the question and save to local question list
                             test[questionIndex].question = changeQTo;
                         break;
                         case "2":
                             System.Console.WriteLine("What would you like to edit the answer to?");
                             string changeATo = Console.ReadLine();
+                            // Edit answer and save change to DB
                             questionRepo.EditAnswer(questionID, changeATo);
+                            // Edit answer and save change to local question list
                             test[questionIndex].answer = changeATo;
                         break;
                         case "3":
                             if(test[questionIndex].typeID == 1)
                             {
-                            System.Console.WriteLine("What choice would you like to edit?");
-                            string choiceLetter = Console.ReadLine();
-                            System.Console.WriteLine("What would you like to edit the " + choiceLetter + " choice to?");
-                            string changeCTo = Console.ReadLine();
-                            choiceRepo.EditChoice(questionID, choiceLetter, changeCTo);
+                                // Determine which choice to change
+                                System.Console.WriteLine("What choice would you like to edit?");
+                                string choiceLetter = Console.ReadLine();
+                                System.Console.WriteLine("What would you like to edit the " + choiceLetter + " choice to?");
+                                string changeCTo = Console.ReadLine();
+                                // Edit and save change to DB
+                                choiceRepo.EditChoice(questionID, choiceLetter, changeCTo);
+                                // Edit and save change to local question list
                                 foreach(Choice choice in test[questionIndex].choices)
                                 {
                                     if(choice.choiceLetter.ToString() == choiceLetter)
@@ -368,20 +402,31 @@ namespace qS_UI
                 }
             }
         }
+        /*
+            A method to delete the currently loaded test
+            Returns bool, if true, test deleted, false otherwise
+        */
         public bool deleteTest(int userID)
         {
             TestRepo testRepo = new TestRepo(connectionString);
+            // Confirmation of delete
             System.Console.WriteLine("Are you sure you want to delete?");
             string userChoice = Console.ReadLine();
+            // Set input to all CAPS so capitalization does not matter
             userChoice = userChoice.ToUpper();
             if(userChoice.Equals("Y") || userChoice.Equals("YES"))
             {
+                // Delete test from DB
                 testRepo.deleteTest(userID, loadedTestID);
                 return true;
             }
             return false;
             
         }   
+        /*
+            A method to take the currently loaded test
+            Prints out the result for the test after completing it
+        */
         public void takeTest(List<Question> questions)
         {
             Test test = new Test();
