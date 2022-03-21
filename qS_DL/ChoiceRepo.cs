@@ -33,6 +33,23 @@ namespace qS_DL
             }
             return false;
         }
+        public bool AddChoice(int qID, char choiceLetter, string choice)
+        {
+            using(SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string query = "INSERT INTO Choices VALUES (@questionID, @choiceLetter, @choice)";
+                using(SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@questionID",qID);
+                    cmd.Parameters.AddWithValue("@choiceLetter",choiceLetter);
+                    cmd.Parameters.AddWithValue("@choice",choice);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            return false;
+        }
         public void EditChoice(int questionID, string choiceLetter, string changeTo)
         {
             using(SqlConnection conn = new SqlConnection(_connectionString))
@@ -45,6 +62,20 @@ namespace qS_DL
                     cmd.Parameters.AddWithValue("@questionID", questionID);
                     cmd.Parameters.AddWithValue("@choiceLetter", choiceLetter);
 
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        public void DeleteChoice(int questionID, string choiceLetter)
+        {
+            using(SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string query = "DELETE FROM Choices WHERE questionID = @questionID AND choiceLetter = @choiceLetter";
+                using(SqlCommand cmd = new SqlCommand(query,conn))
+                {
+                    cmd.Parameters.AddWithValue("@questionID",questionID);
+                    cmd.Parameters.AddWithValue("@choiceLetter",choiceLetter);
                     cmd.ExecuteNonQuery();
                 }
             }

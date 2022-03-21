@@ -279,13 +279,15 @@ namespace qS_UI
                         int qID = questionRepo.AddQuestion(currQuestion);
                         // Add choices to given questionID
                         choiceRepo.AddChoices(qID, currQuestion.choices);
+                        loadedTest.Add(currQuestion);
                     break;
                     // IF question is Free Response 
                     case "2":
                         // Create question
                         currQuestion = currQuestion.createQuestion(testID);
                         // Save question to DB
-                        questionRepo.AddQuestion(currQuestion);
+                        questionRepo.AddQuestion(currQuestion);  
+                        loadedTest.Add(currQuestion);                      
                     break;
                     default:
                         // If input it blank, done adding questions
@@ -304,7 +306,6 @@ namespace qS_UI
             }
         }
         #endregion
-        
         /*
             A method to edit a test using its list of questions, just to query the DB less
         */
@@ -319,7 +320,7 @@ namespace qS_UI
             {
                 // First find which question to edit and get list of question IDs
                 questionIDs = displayTest(test);
-                System.Console.WriteLine("Which question would you like to edit?");
+                System.Console.WriteLine("Which question would you like to edit? (Or type 'add' to make a new question)");
                 string input = Console.ReadLine();
                 int questionID = -1;
                 // IF input is empty, done editing
@@ -327,12 +328,17 @@ namespace qS_UI
                 {
                     isEditing = false;
                 }
+                else if (input.Equals("add"))
+                {
+                    makeQuestions(loadedTestID);
+                }
                 // ELSE edit question
                 else
                 {
-                    int questionIDIndex = Convert.ToInt32(input);
+                    int questionIDIndex = Convert.ToInt32(input) - 1;
                     // Get the inputted question's real questionID
-                    questionID = questionIDs[questionIDIndex-1];
+                    questionID = questionIDs[questionIDIndex];
+                    System.Console.WriteLine(questionID);
                     int questionIndex = 0;
                     // Find the question with the inputted questionID
                     while(test[questionIndex].questionID != questionID && questionIndex < test.Count)
@@ -346,11 +352,13 @@ namespace qS_UI
                     if(test[questionIndex].typeID == 1)
                     {
                         System.Console.WriteLine("  3. The choices");
-                        System.Console.WriteLine("  4. Exit");
+                        System.Console.WriteLine("  4. Delete Question");
+                        System.Console.WriteLine("  5. Exit");
                     }
                     else
                     {
-                        System.Console.WriteLine("  3. Exit"); 
+                        System.Console.WriteLine("  3. Delete Question");
+                        System.Console.WriteLine("  4. Exit"); 
                     }                   
                     string toEdit = Console.ReadLine();
                     switch(toEdit)
@@ -375,20 +383,63 @@ namespace qS_UI
                             if(test[questionIndex].typeID == 1)
                             {
                                 // Determine which choice to change
-                                System.Console.WriteLine("What choice would you like to edit?");
+                                System.Console.WriteLine("What choice would you like to edit? (or type 'add' to add a new choice)");
                                 string choiceLetter = Console.ReadLine();
-                                System.Console.WriteLine("What would you like to edit the " + choiceLetter + " choice to?");
-                                string changeCTo = Console.ReadLine();
-                                // Edit and save change to DB
-                                choiceRepo.EditChoice(questionID, choiceLetter, changeCTo);
-                                // Edit and save change to local question list
-                                foreach(Choice choice in test[questionIndex].choices)
+                                if(choiceLetter.Equals("add"))
                                 {
-                                    if(choice.choiceLetter.ToString() == choiceLetter)
+                                    System.Console.WriteLine("What choice would you like to add?");
+                                    string addChoice = Console.ReadLine();
+                                    if(!string.IsNullOrEmpty(addChoice))
                                     {
-                                        choice.choice = changeCTo;
+                                        int lastChoice = test[questionIndex].choices.Count - 1;
+                                        char newChoiceLetter = (char)test[questionIndex].choices[lastChoice].choiceLetter;
+                                        newChoiceLetter++;
+                                        choiceRepo.AddChoice(questionID, newChoiceLetter, addChoice);
+                                        Choice newChoice = new Choice(questionID, newChoiceLetter, addChoice);
+                                        test[questionIndex].choices.Add(newChoice);
                                     }
                                 }
+                                else
+                                {
+                                    System.Console.WriteLine("What would you like to edit the " + choiceLetter + " choice to? (or type 'del' to delete choice)");
+                                    string changeCTo = Console.ReadLine();
+                                    // Edit and save change to DB
+                                    if(changeCTo.Equals("del"))
+                                    {
+                                        choiceRepo.DeleteChoice(questionID, choiceLetter);
+                                    }                              
+                                    else
+                                    {
+                                        choiceRepo.EditChoice(questionID, choiceLetter, changeCTo);
+                                    }
+                                    // Edit and save change to local question list
+                                    int index = 0;
+                                    foreach(Choice choice in test[questionIndex].choices)
+                                    {                                    
+                                        if(choice.choiceLetter.ToString() == choiceLetter)
+                                        {
+                                            if(changeCTo.Equals("del"))
+                                            {                                            
+                                                test[questionIndex].choices.Remove(test[questionIndex].choices[index]);
+                                                break;
+                                            }
+                                            choice.choice = changeCTo;
+                                        }
+                                        index++;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                questionRepo.DeleteQuestion(questionID);
+                                test.Remove(test[questionIDIndex]);
+                            }
+                        break;
+                        case "4":
+                            if(test[questionIndex].typeID == 1)
+                            {
+                                questionRepo.DeleteQuestion(questionID);
+                                test.Remove(test[questionIDIndex]);
                             }
                             else
                             {

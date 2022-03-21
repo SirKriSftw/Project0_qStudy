@@ -58,7 +58,6 @@ namespace qS_DL
                 }
             }
         }
-
         public void EditAnswer(int questionID, string changeTo)
         {
             using(SqlConnection conn = new SqlConnection(_connectionString))
@@ -70,6 +69,19 @@ namespace qS_DL
                     cmd.Parameters.AddWithValue("@changeTo", changeTo);
                     cmd.Parameters.AddWithValue("@questionID", questionID);
 
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        public void DeleteQuestion(int questionID)
+        {
+            using(SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string query = "DELETE FROM Questions WHERE questionID = @questionID";
+                using(SqlCommand cmd = new SqlCommand(query,conn))
+                {
+                    cmd.Parameters.AddWithValue("@questionID",questionID);
                     cmd.ExecuteNonQuery();
                 }
             }

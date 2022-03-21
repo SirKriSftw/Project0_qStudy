@@ -64,7 +64,7 @@ namespace qS_DL
                         Question currQuestion = new Question(questionID, (int)row["testID"], typeID,(string)row["question"],(string)row["answer"]);
                         if(typeID == 1)
                         {
-                            query = "SELECT * FROM Choices WHERE questionID = @questionID";
+                            query = "SELECT * FROM Choices WHERE questionID = @questionID ORDER BY choiceLetter";
                             cmd.CommandText = query;
                             if(!paramAdded)
                             {
