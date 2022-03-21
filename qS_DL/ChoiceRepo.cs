@@ -33,6 +33,21 @@ namespace qS_DL
             }
             return false;
         }
-        //public List<String> getChoices(int question)
+        public void EditChoice(int questionID, string choiceLetter, string changeTo)
+        {
+            using(SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string query = "UPDATE Choices SET choice = @changeTo WHERE questionID = @questionID AND choiceLetter = @choiceLetter";
+                using(SqlCommand cmd = new SqlCommand(query,conn))
+                {
+                    cmd.Parameters.AddWithValue("@changeTo", changeTo);
+                    cmd.Parameters.AddWithValue("@questionID", questionID);
+                    cmd.Parameters.AddWithValue("@choiceLetter", choiceLetter);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
     }
 }

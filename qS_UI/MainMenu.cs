@@ -76,9 +76,7 @@ namespace qS_UI
                         }                        
                     break; 
                     case "5":
-                        displayTest(loadedTest);
-                        //take loaded test
-
+                        takeTest(loadedTest);
                     break;
                     default:
                         isStudying = false;
@@ -87,6 +85,8 @@ namespace qS_UI
             }
         }
 
+        //public bool login(string username, string password)
+        //public void logout()
         #region Displaying test
         public void displayTest(int testID)
         {
@@ -100,7 +100,6 @@ namespace qS_UI
                 questionNo++;
             }
         }
-
         public void displayTest(List<Question> test)
         {
             int questionNo = 1;
@@ -112,10 +111,26 @@ namespace qS_UI
             }
         }
         #endregion
-        //public bool login(string username, string password)
-        //public void logout()
+        #region Load Test
+        public void viewTests(int userID)
+        {
+            TestRepo testRepo = new TestRepo(connectionString);
+            List<Test> tests = testRepo.getUsersTest(userID);
+            foreach(Test test in tests)
+            {
+                test.displayTestName();
+            }
+        }
 
-        //public void takeTest()
+        public List<Question> loadTest(int testID)
+        {           
+            TestRepo testRepo = new TestRepo(connectionString);
+            List<Question> test = testRepo.getTestQuestions(testID);
+            loadedTestID = testID;
+            return test;
+        }
+        #endregion
+        #region Create Test
         public void makeTest()
         {
             System.Console.WriteLine("Enter test's name");
@@ -125,7 +140,6 @@ namespace qS_UI
             makeQuestion(testID);
             
         }
-
         private void makeQuestion(int testID)
         {
             QuestionRepo questionRepo = new QuestionRepo(connectionString);
@@ -164,25 +178,8 @@ namespace qS_UI
                 }
             }
         }
-
-
-        public void viewTests(int userID)
-        {
-            TestRepo testRepo = new TestRepo(connectionString);
-            List<Test> tests = testRepo.getUsersTest(userID);
-            foreach(Test test in tests)
-            {
-                test.displayTestName();
-            }
-        }
-
-        public List<Question> loadTest(int testID)
-        {           
-            TestRepo testRepo = new TestRepo(connectionString);
-            List<Question> test = testRepo.getTestQuestions(testID);
-            loadedTestID = testID;
-            return test;
-        }
+        #endregion
+        
         public void editTest(List<Question> test)
         {
             QuestionRepo questionRepo = new QuestionRepo(connectionString);
@@ -267,5 +264,11 @@ namespace qS_UI
             return false;
             
         }   
+        public void takeTest(List<Question> questions)
+        {
+            Test test = new Test();
+            double score = test.takeTest(questions);
+            System.Console.WriteLine("Percentage correct: {0}%", Math.Round(score, 2));
+        }
     }
 }

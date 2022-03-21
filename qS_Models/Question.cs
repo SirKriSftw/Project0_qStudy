@@ -38,6 +38,7 @@ namespace qS_Models
         }
         public void displayQuestion()
         {
+            System.Console.WriteLine();
             System.Console.WriteLine(question);
             if(typeID == 1)
             {
@@ -45,8 +46,7 @@ namespace qS_Models
                 {
                     System.Console.WriteLine("   " + newChoice.choiceLetter + ". " + newChoice.choice);
                 }   
-            }
-            System.Console.WriteLine();
+            }            
         }
 
         public Question createQuestion(int testID)
@@ -88,6 +88,13 @@ namespace qS_Models
             string answer = Console.ReadLine();
             return new Question(testID, 1, question, answer, choices);
         }
-        //public bool answerQuestion(string answer)
+        public bool answerQuestion(string answer)
+        {
+            if(this.answer.Equals(answer))
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }

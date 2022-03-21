@@ -20,6 +20,22 @@ namespace qS_Models
         {
             System.Console.WriteLine(testID + ". " + name);
         }
-        //public double takeTest(int testID)
+
+        public double takeTest(List<Question> questions)
+        {
+            int numCorrect = 0;
+            int numAnswered = 0;
+            foreach(Question currQuestion in questions)
+            {
+                currQuestion.displayQuestion();
+                string answer = Console.ReadLine();
+                if(currQuestion.answerQuestion(answer))
+                {
+                    numCorrect++;
+                }
+                numAnswered++;
+            }
+            return (double)numCorrect/numAnswered * 100;
+        }
     }
 }
