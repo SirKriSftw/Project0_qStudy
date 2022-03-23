@@ -33,3 +33,5 @@ CREATE TABLE Choices(
 	choice varchar(100) NOT NULL
 )
 SELECT * FROM Choices
+
+DROP TABLE Choices, Questions, Types, Tests, Users

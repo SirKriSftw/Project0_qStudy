@@ -204,6 +204,7 @@ namespace qS_UI
             {
                 testIDs.Add(test.testID);
                 System.Console.WriteLine(testNo + ". " + test.name);
+                testNo++;
             }
             // Make sure input is not empty
             string input = Console.ReadLine();

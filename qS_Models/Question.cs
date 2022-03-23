@@ -58,6 +58,7 @@ namespace qS_Models
         }
         public Question createMCQuestion(int testID)
         {
+            choices = new List<Choice>();
             System.Console.WriteLine("Enter the question");
             string question = Console.ReadLine();            
             bool isAddingChoices = true;
@@ -89,7 +90,8 @@ namespace qS_Models
         }
         public bool answerQuestion(string answer)
         {
-            if(this.answer.Equals(answer))
+            answer = answer.ToUpper();
+            if(this.answer.ToUpper().Equals(answer))
             {
                 return true;
             }
